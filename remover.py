@@ -13,14 +13,15 @@ class TagRemover:
             self.soup = BeautifulSoup(f.read(), 'html.parser')
     
     # Remove specified classes and ids from soup.
-    def remove(self, class_list=[], id_list=[]):
+    def remove(self, classes=[], ids=[], tags=[]):
         def remover(identifier, finder):
             for elem in identifier:
                 for tag in finder(elem):
                     tag.extract()
         
-        remover(class_list, lambda e: self.soup.find_all(class_=e))
-        remover(id_list, lambda e: self.soup.find_all(id=e))
+        remover(classes, lambda e: self.soup.find_all(class_=e))
+        remover(ids, lambda e: self.soup.find_all(id=e))
+        remover(tags, lambda e: self.soup.find_all(e))
 
     # Save soup as prettified html.
     def save(self, safe_mode=True):
@@ -38,10 +39,15 @@ if __name__ == '__main__':
     parser.add_argument('html_path', help='path to html file')
     parser.add_argument('--cls', nargs='*', help='classes you want to remove')
     parser.add_argument('--id', nargs='*', help='ids you want to remove')
+    parser.add_argument('--tag', nargs='*', help='tags you want to remove')
     parser.add_argument('--safe', action='store_true', help='create another file for safety')
 
     args = parser.parse_args()
     
     r = TagRemover(args.html_path)
-    r.remove(class_list=args.cls if args.cls else [], id_list=args.id if args.id else [])
+    r.remove(
+        classes=args.cls if args.cls else [],
+        ids=args.id if args.id else [],
+        tags=args.tag if args.tag else []
+    )
     r.save(safe_mode=args.safe)
